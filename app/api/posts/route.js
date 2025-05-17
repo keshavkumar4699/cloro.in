@@ -29,11 +29,13 @@ export async function POST(request) {
   await connectMongo();
 
   try {
-    const { title, content } = await request.json();
+    const { title, content, category, uploadedImageUrl } = await request.json();
 
     const newPost = new Post({
       title,
       content,
+      category,
+      imageUrl: uploadedImageUrl,
       author: session.user.id,
     });
 
