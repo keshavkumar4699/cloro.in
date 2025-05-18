@@ -43,7 +43,7 @@ export default function PostsPage() {
       <Header />
       <div className="container mx-auto py-8">
         <div className="mb-8">
-          <PostsList initialPosts={posts} onNewPost={handleNewPost} />
+          <PostsList initialPosts={posts} />
         </div>
 
         <PostModal

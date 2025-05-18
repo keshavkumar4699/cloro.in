@@ -1,38 +1,26 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
 import Logo from "../Logo";
 import NavLinks from "./NavLinks";
-import MobileMenu from "./MobileMenu";
 import AuthModal from "./AuthModal/AuthModal";
 import ButtonSignin from "../ButtonSignin";
-import config from "@/config";
 
-const Header = () => {
-  const searchParams = useSearchParams();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+const Header = ({ toggleMobileMenu }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('login');
 
-  // Close mobile menu when search params change
   useEffect(() => {
-    setIsSidebarOpen(false);
-  }, [searchParams]);
-
-  // Handle body overflow when modals are open
-  useEffect(() => {
-    if (isAuthModalOpen || isSidebarOpen) {
+    if (isAuthModalOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => { document.body.style.overflow = 'unset'; };
-  }, [isAuthModalOpen, isSidebarOpen]);
+  }, [isAuthModalOpen]);
 
   const openAuthModal = useCallback((mode) => {
     setAuthModalMode(mode);
     setIsAuthModalOpen(true);
-    setIsSidebarOpen(false);
   }, []);
 
   const closeAuthModal = useCallback(() => {
@@ -41,40 +29,37 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-base-200 sticky top-0 z-40 shadow-sm">
-        <nav className="container flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 mx-auto" aria-label="Global">
-          <Logo />
-          
-          <div className="flex lg:hidden">
+      <header className="bg-base-200 sticky top-0 z-40 border-b border-base-300">
+        <nav className="container flex items-center justify-between px-6 py-4 mx-auto">
+          <div className="flex items-center gap-4">
+            {/* Mobile menu button */}
             <button 
-              type="button" 
-              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-base-content" 
-              onClick={() => setIsSidebarOpen(true)}
-              aria-label="Open main menu"
+              onClick={toggleMobileMenu}
+              className="lg:hidden btn btn-ghost btn-square"
+              aria-label="Open menu"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
+            <Logo />
           </div>
-
-          <NavLinks className="hidden lg:flex" />
           
-          <div className="hidden lg:flex lg:justify-end lg:flex-1 items-center gap-3">
+          <div className="flex items-center gap-2">
             <ButtonSignin 
-              extraStyle="btn-primary btn-outline btn-sm" 
               onOpenLoginModal={() => openAuthModal('login')} 
+              extraStyle="btn-primary btn-outline btn-sm"
             />
           </div>
         </nav>
-
-        <MobileMenu 
-          isOpen={isSidebarOpen} 
-          onClose={() => setIsSidebarOpen(false)}
-          openAuthModal={openAuthModal}
-        />
       </header>
-
+      
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={closeAuthModal} 

@@ -9,7 +9,7 @@ import connectMongo from "@/libs/mongoose";
 export async function GET() {
   await connectMongo();
   try {
-    const posts = await Post.find().populate("author", "name email image").exec();
+    const posts = await Post.find().sort({createdAt:-1}).populate("author", "name email image").exec();
     return NextResponse.json(posts);
   } catch (error) {
     return NextResponse.json(
@@ -35,6 +35,7 @@ export async function POST(request) {
     const title = formData.get('title');
     const content = formData.get('content');
     const category = formData.get('category');
+    
     const imageFile = formData.get('image');
     
     // Handle file upload (example using Cloudinary)

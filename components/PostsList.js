@@ -21,7 +21,7 @@ const PostImage = ({ src, alt }) => {
   );
 };
 
-export default function PostsList({ initialPosts = [], onNewPost }) {
+export default function PostsList({ initialPosts = [] }) {
   const [posts, setPosts] = useState(initialPosts);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
