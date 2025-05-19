@@ -12,7 +12,7 @@ const NavLinks = ({ className = "" }) => (
       <Link 
         href={link.href} 
         key={link.href} 
-        className="text-base font-medium block px-3 rounded-lg  text-base-content py-2 hover:bg-base-100 transition-colors" 
+        className="text-sm link font-medium block px-3 rounded-lg  text-base-content py-2 hover:bg-base-100 transition-colors" 
         title={link.label}
       >
         {link.label}

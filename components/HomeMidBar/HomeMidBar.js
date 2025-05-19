@@ -1,13 +1,13 @@
 // HomeMidBar.js
 "use client";
 import { useState } from "react";
-import {
-  PencilSquareIcon,
-} from "@heroicons/react/24/solid";
+import { useSession } from "next-auth/react";
+import { PencilSquareIcon } from "@heroicons/react/24/solid";
 import PostModal from "@/components/PostModal/PostModal"; // Using the previously refactored PostModal
 import PostsList from "@/components/PostsList"; // Using the previously refactored PostsList
 
 const HomeMidBar = () => {
+  const { data: isSession } = useSession();
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const handlePostCreated = () => {
@@ -37,27 +37,31 @@ const HomeMidBar = () => {
     // PostsList itself also has max-w-3xl, so this could be adjusted.
     <div className="mx-auto px-2 py-4 sm:px-4 sm:py-6">
       {/* Optional: "Create Post" input-like bar at the top */}
-      <div className="mb-6">
-        <div
-          onClick={() => setIsPostModalOpen(true)}
-          className="bg-base-100 p-3 sm:p-4 rounded-lg shadow hover:shadow-md flex items-center cursor-pointer transition-all group"
-        >
-          <div className="avatar mr-3 sm:mr-4 relative">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center">
-              <PencilSquareIcon className="w-4 h-4 sm:w-5 sm:h-5 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+      {isSession ? (
+        <div className="mb-6">
+          <div
+            onClick={() => setIsPostModalOpen(true)}
+            className="bg-base-100 p-3 sm:p-4 rounded-lg shadow hover:shadow-md flex items-center cursor-pointer transition-all group"
+          >
+            <div className="avatar mr-3 sm:mr-4 relative">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center">
+                <PencilSquareIcon className="w-4 h-4 sm:w-5 sm:h-5 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+              </div>
             </div>
+            <input
+              type="text"
+              placeholder="Create a new post..."
+              className="input input-ghost w-full !p-0 text-sm sm:text-base group-hover:text-primary transition-colors"
+              readOnly
+            />
+            <button className="btn btn-primary btn-sm hidden sm:inline-flex ml-2">
+              Create
+            </button>
           </div>
-          <input
-            type="text"
-            placeholder="Create a new post..."
-            className="input input-ghost w-full !p-0 text-sm sm:text-base group-hover:text-primary transition-colors"
-            readOnly
-          />
-          <button className="btn btn-primary btn-sm hidden sm:inline-flex ml-2">
-            Create
-          </button>
         </div>
-      </div>
+      ) : (
+        {}
+      )}
 
       {/* PostsList will render its loading/empty/error states internally */}
       <PostsList key={refreshTrigger} />
