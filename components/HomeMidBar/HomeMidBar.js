@@ -58,11 +58,8 @@ const HomeMidBar = () => {
               Create
             </button>
           </div>
-        </div>
-      ) : (
-        {}
-      )}
-
+        </div>):null}
+    
       {/* PostsList will render its loading/empty/error states internally */}
       <PostsList key={refreshTrigger} />
 
