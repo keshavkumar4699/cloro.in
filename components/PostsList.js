@@ -1,76 +1,57 @@
-// components/PostsList.js
 "use client";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ChatBubbleLeftEllipsisIcon, 
-  TagIcon, 
-  UserCircleIcon, 
-  CalendarDaysIcon, 
-  PhotoIcon, 
-  ExclamationCircleIcon,
-  HeartIcon
-} from '@heroicons/react/24/outline';
+import {
+  ArrowUpIcon,
+  PaperAirplaneIcon,
+  PaperClipIcon,
+  LinkIcon,
+} from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-const PostImage = ({ src, alt }) => {
-  if (!src) return null;
+const PostContent = ({ content, imageUrl }) => {
   return (
-    <div className="mt-3 mb-2 rounded-lg overflow-hidden max-h-96 flex justify-center bg-base-200">
-      <img src={src} alt={alt} className="object-contain max-h-96" />
+    <div className="mt-2 mb-3">
+      {content && (
+        <p className="text-base-content/90 text-sm mb-3">{content}</p>
+      )}
+      {imageUrl && (
+        <div className="rounded-lg overflow-hidden max-h-96 flex justify-center bg-base-200">
+          <img
+            src={imageUrl}
+            alt="Post content"
+            className="object-contain max-h-96 w-full"
+          />
+        </div>
+      )}
     </div>
   );
 };
 
-export default function PostsList({ initialPosts = [] }) {
-  const [posts, setPosts] = useState(initialPosts);
+export default function PostsList() {
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Update posts when initialPosts changes (like after a new post)
-  useEffect(() => {
-    setPosts(initialPosts);
-  }, [initialPosts]);
-
-  const listVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30, scale: 0.98 },
-    show: { 
-      opacity: 1, 
-      y: 0, 
-      scale: 1,
-      transition: { type: "spring", stiffness: 100, damping: 15 }
-    },
-    exit: { 
-      opacity: 0, 
-      y: -20, 
-      scale: 0.98,
-      transition: { duration: 0.2 }
-    }
-  };
+  const [interactions, setInteractions] = useState({});
+  const router = useRouter();
 
   useEffect(() => {
     const fetchPosts = async () => {
-      setLoading(true);
-      setError(null);
       try {
         const res = await fetch("/api/posts");
-        if (!res.ok) {
-          throw new Error(`Failed to fetch posts. Status: ${res.status}`);
-        }
         const data = await res.json();
         setPosts(data);
+        // Initialize interactions state
+        const initialInteractions = {};
+        data.forEach((post) => {
+          initialInteractions[post._id] = {
+            upvoted: false,
+            pinned: false,
+            linked: false,
+          };
+        });
+        setInteractions(initialInteractions);
       } catch (error) {
-        console.error("Failed to fetch posts:", error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -80,125 +61,218 @@ export default function PostsList({ initialPosts = [] }) {
     fetchPosts();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[300px] space-y-4 py-12">
-        <span className="loading loading-ball loading-lg text-primary"></span>
-        <p className="text-base-content/70">Loading awesome content...</p>
-      </div>
-    );
-  }
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
 
-  if (error) {
-    return (
-      <div className="alert alert-error shadow-lg my-8">
-        <ExclamationCircleIcon className="stroke-current shrink-0 h-6 w-6" />
-        <div>
-          <h3 className="font-bold">Oops! Something went wrong.</h3>
-          <div className="text-xs">{error}</div>
-        </div>
-        <button 
-          className="btn btn-sm btn-ghost" 
-          onClick={() => window.location.reload()}
-        >
-          Try Again
-        </button>
-      </div>
-    );
-  }
+    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  };
 
-  if (posts.length === 0) {
+  const handleInteraction = (postId, type) => {
+    setInteractions((prev) => ({
+      ...prev,
+      [postId]: {
+        ...prev[postId],
+        [type]: !prev[postId][type],
+      },
+    }));
+  };
+
+  const getButtonStyles = (postId, type) => {
+    const base =
+      "btn btn-ghost btn-sm p-1 min-h-0 h-auto rounded-lg transition-all duration-200";
+    if (interactions[postId]?.[type]) {
+      // Active state styles
+      return `${base} ${
+        type === "upvoted"
+          ? "bg-red-50 hover:bg-red-100"
+          : type === "pinned"
+          ? "bg-green-50 hover:bg-green-100"
+          : type === "linked"
+          ? "bg-blue-50 hover:bg-blue-100"
+          : "bg-violet-50 hover:bg-violet-100"
+      }`;
+    }
+
+    // Inactive state hover styles
+    return `${base} ${
+      type === "upvoted"
+        ? "hover:bg-red-50"
+        : type === "pinned"
+        ? "hover:bg-green-50"
+        : type === "linked"
+        ? "hover:bg-blue-50"
+        : "hover:bg-violet-50"
+    }`;
+  };
+
+  if (loading)
     return (
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center py-16"
-      >
-        <PhotoIcon className="w-20 h-20 mx-auto text-base-content/30 mb-4" />
-        <h3 className="text-2xl font-semibold text-base-content mb-2">No Posts Yet!</h3>
-        <p className="text-base-content/70"> It&excl;s a bit quiet here. Be the first to share something amazing!</p>
-      </motion.div>
+      <div className="loading loading-spinner text-primary mx-auto mt-8"></div>
     );
-  }
+  if (error)
+    return <div className="text-error text-center mt-8">Error: {error}</div>;
 
   return (
-    <motion.div 
-      className="space-y-6 py-8 max-w-3xl mx-auto px-4"
-      variants={listVariants}
-      initial="hidden"
-      animate="show"
-    >
-      <AnimatePresence>
-        {posts.map((post) => (
-          <motion.div
-            key={post._id}
-            variants={itemVariants}
-            layout
-            className="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out rounded-lg border border-base-300/50"
-          >
-            <div className="card-body p-5 md:p-6">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="avatar">
-                  <div className="w-10 h-10 rounded-full ring-1 ring-primary/50 ring-offset-base-100 ring-offset-1">
-                    {post.author?.image ? (
-                      <img 
-                        src={post.author.image} 
-                        alt={post.author.name || 'Author'} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center text-lg font-semibold">
-                        {post.author?.name?.charAt(0).toUpperCase() || <UserCircleIcon className="w-6 h-6"/>}
-                      </div>
-                    )}
+    <div className="space-y-3 sm:space-y-4">
+      {posts.map((post) => (
+        <div
+          key={post._id}
+          className="card bg-base-100 rounded-lg p-3 sm:p-4 transition-all duration-200 hover:bg-base-300 border border-base-200 hover:border-slate-300"
+          onClick={(e) => {
+            if (!e.target.closest(".interactive")) {
+              router.push(`/posts/${post._id}`);
+            }
+          }}
+        >
+          {/* Post title and timestamp */}
+          <div className="flex items-center flex-wrap gap-x-2">
+            <Link
+              className="font-semibold text-base-content hover:text-primary transition-colors duration-200 interactive text-sm sm:text-base"
+              href={`/posts/${post._id}`}
+            >
+              {post.title}
+            </Link>
+            <span className="text-base-content/50 text-xs sm:text-sm">•</span>
+            <span className="text-xs sm:text-sm text-base-content/50">
+              {formatTimeAgo(post.createdAt)}
+            </span>
+          </div>
+
+          {/* Post content box */}
+          <div className="bg-base-200/50 rounded-lg p-2 sm:p-3 my-2">
+            <PostContent content={post.content} imageUrl={post.imageUrl} />
+          </div>
+
+          {/* User info and action buttons */}
+          <div className="flex items-center justify-between mt-1 sm:mt-2 ">
+            <Link
+              className="flex items-center space-x-2 interactive hover:bg-base-200 rounded-lg p-1 transition-colors duration-200 max-w-[60%]"
+              href={`/users/${post.author?.username || "anonymous"}`}
+            >
+              <div className="avatar">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full">
+                  {post.author?.image ? (
+                    <img
+                      src={post.author.image}
+                      alt={post.author.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="bg-neutral text-neutral-content w-full h-full rounded-full flex items-center justify-center text-xs">
+                      {post.author?.name?.charAt(0) || "U"}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="truncate">
+                <p className="text-xs sm:text-sm font-medium truncate">
+                  {post.author?.name || "Anonymous"}
+                </p>
+                <p className="text-[10px] sm:text-xs text-base-content/50 truncate">
+                  @{post.author?.username || "user"}
+                </p>
+              </div>
+            </Link>
+
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              {/* Upvote */}
+              <div className="interactive">
+                <button
+                  className={getButtonStyles(post._id, "upvoted")}
+                  onClick={() => handleInteraction(post._id, "upvoted")}
+                  onMouseEnter={(e) =>
+                    e.currentTarget.classList.add("hover:text-red-500")
+                  }
+                  onMouseLeave={(e) =>
+                    e.currentTarget.classList.remove("hover:text-red-500")
+                  }
+                >
+                  <div className="flex items-center">
+                    <ArrowUpIcon
+                      className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors duration-200 ${
+                        interactions[post._id]?.upvoted
+                          ? "text-red-500"
+                          : "hover:text-red-500 text-gray-500"
+                      }`}
+                    />
+                    <span className="ml-1 text-xs">{post.upvotes || 0}</span>
                   </div>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-base-content">
-                    {post.author?.name || "Anonymous User"}
-                  </p>
-                  <p className="text-xs text-base-content/70 flex items-center">
-                    <CalendarDaysIcon className="w-3 h-3 mr-1"/>
-                    {new Date(post.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric", 
-                      month: "short", 
-                      day: "numeric",
-                    })}
-                  </p>
-                </div>
-              </div>
-
-              <h2 className="card-title text-xl md:text-2xl font-bold text-base-content mb-1">
-                {post.title}
-              </h2>
-
-              {post.category && (
-                <div className="badge badge-primary badge-outline text-xs font-medium py-2 px-2.5 mb-3 flex items-center gap-1">
-                  <TagIcon className="w-3.5 h-3.5"/>
-                  {post.category.charAt(0).toUpperCase() + post.category.slice(1)}
-                </div>
-              )}
-              
-              {post.imageUrl && <PostImage src={post.imageUrl} alt={post.title} />}
-
-              <p className="text-base-content/90 leading-relaxed mb-4">
-                {post.content.length > 200 ? `${post.content.substring(0, 200)}...` : post.content}
-              </p>
-
-              <div className="card-actions justify-start items-center mt-4 pt-4 border-t border-base-300/70">
-                <button className="btn btn-ghost btn-sm text-base-content/80 hover:bg-base-200 hover:text-primary">
-                  <HeartIcon className="h-5 w-5 mr-1" />
-                  {post.upvotes || 0}
-                </button>
-                <button className="btn btn-ghost btn-sm text-base-content/80 hover:bg-base-200 hover:text-primary">
-                  <ChatBubbleLeftEllipsisIcon className="h-5 w-5 mr-1" />
-                  {post.commentsCount || 0}
                 </button>
               </div>
+              {/* Links */}
+              <div className="interactive">
+                <button
+                  className={getButtonStyles(post._id, "linked")}
+                  onClick={() => handleInteraction(post._id, "linked")}
+                  onMouseEnter={(e) =>
+                    e.currentTarget.classList.add("hover:text-blue-500")
+                  }
+                  onMouseLeave={(e) =>
+                    e.currentTarget.classList.remove("hover:text-blue-500")
+                  }
+                >
+                  <div className="flex items-center">
+                    <LinkIcon
+                      className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors duration-200 ${
+                        interactions[post._id]?.linked
+                          ? "text-blue-500"
+                          : "hover:text-blue-500 text-gray-500"
+                      }`}
+                    />
+                    <span className="ml-1 text-xs">{post.links || 0}</span>
+                  </div>
+                </button>
+              </div>
+              {/* Pin */}
+              <div className="interactive">
+                <button
+                  className={getButtonStyles(post._id, "pinned")}
+                  onClick={() => handleInteraction(post._id, "pinned")}
+                  onMouseEnter={(e) =>
+                    e.currentTarget.classList.add("hover:text-green-500")
+                  }
+                  onMouseLeave={(e) =>
+                    e.currentTarget.classList.remove("hover:text-green-500")
+                  }
+                >
+                  <div className="flex items-center">
+                    <PaperClipIcon
+                      className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors duration-200 ${
+                        interactions[post._id]?.pinned
+                          ? "text-green-500"
+                          : "hover:text-green-500 text-gray-500"
+                      }`}
+                    />
+                    <span className="ml-1 text-xs">{post.pins || 0}</span>
+                  </div>
+                </button>
+              </div>
+              {/* Share */}
+              <div className="interactive">
+                <button
+                  className={getButtonStyles(post._id, "shared")}
+                  onMouseEnter={(e) =>
+                    e.currentTarget.classList.add("hover:text-violet-500")
+                  }
+                  onMouseLeave={(e) =>
+                    e.currentTarget.classList.remove("hover:text-violet-500")
+                  }
+                >
+                  <PaperAirplaneIcon
+                    className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors duration-200 ${"hover:text-violet-500 text-gray-500"}`}
+                  />
+                </button>
+              </div>{" "}
             </div>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    </motion.div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
