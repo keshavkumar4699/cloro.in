@@ -126,7 +126,7 @@ export default function PostModal({ isOpen, onClose, onPostCreated }) {
 
       {/* Modal container */}
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? '' : 'pointer-events-none'}`}
+        className={`fixed inset-0 z-40 flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? '' : 'pointer-events-none'}`}
       >
         <div
           ref={modalRef}

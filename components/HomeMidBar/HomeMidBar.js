@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { PencilSquareIcon } from "@heroicons/react/24/solid";
-import PostModal from "@/components/PostModal/PostModal"; // Using the previously refactored PostModal
-import PostsList from "@/components/PostsList"; // Using the previously refactored PostsList
+import PostModal from "@/components/HomeMidBar/PostModal"; // Using the previously refactored PostModal
+import PostsList from "@/components/HomeMidBar/PostsList"; // Using the previously refactored PostsList
 
 const HomeMidBar = () => {
   const { data: isSession } = useSession();
@@ -41,7 +41,7 @@ const HomeMidBar = () => {
         <div className="mb-6">
           <div
             onClick={() => setIsPostModalOpen(true)}
-            className="bg-base-100 p-3 sm:p-4 rounded-lg shadow hover:shadow-md flex items-center cursor-pointer transition-all group"
+            className="bg-base-100 px-3 sm:p-1 sm:px-2 rounded-3xl shadow hover:shadow-md flex items-center cursor-pointer transition-all group"
           >
             <div className="avatar mr-3 sm:mr-4 relative">
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center">
@@ -54,9 +54,6 @@ const HomeMidBar = () => {
               className="input input-ghost w-full !p-0 text-sm sm:text-base group-hover:text-primary transition-colors"
               readOnly
             />
-            <button className="btn btn-primary btn-sm hidden sm:inline-flex ml-2">
-              Create
-            </button>
           </div>
         </div>):null}
     
