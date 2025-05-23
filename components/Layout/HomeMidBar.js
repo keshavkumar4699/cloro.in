@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { PencilSquareIcon } from "@heroicons/react/24/solid";
-import PostModal from "@/components/HomeMidBar/PostModal"; // Using the previously refactored PostModal
-import PostsList from "@/components/HomeMidBar/PostsList"; // Using the previously refactored PostsList
+import PostModal from "@/components/PostComponents/PostModal"; 
+import PostsList from "@/components/PostComponents/PostsList"; 
 
 const HomeMidBar = () => {
   const { data: isSession } = useSession();
@@ -15,28 +15,9 @@ const HomeMidBar = () => {
     setRefreshTrigger((prev) => prev + 1);
     setIsPostModalOpen(false);
   };
-  // Note: PostsList now fetches its own data. If you want HomeMidBar to manage posts,
-  // you'd fetch here and pass to PostsList, and PostsList would accept posts as a prop.
-  // For this example, we assume PostsList handles its own data fetching.
-
-  // The handleNewPost logic might be better if PostModal itself triggers a global state update
-  // or a refetch in PostsList, rather than HomeMidBar managing posts that PostsList also fetches.
-  // For simplicity, if PostModal's onSuccess reloads the page or triggers a revalidation,
-  // this specific handleNewPost might not be strictly necessary here.
-  // However, if you want optimistic updates, this is one way to approach it.
-  // const [optimisticPosts, setOptimisticPosts] = useState([]);
-  // const handleNewPost = (newPost) => {
-  //   // For optimistic updates:
-  //   // setOptimisticPosts((prevPosts) => [newPost, ...prevPosts]);
-  //   setIsPostModalOpen(false);
-  //   // Revalidate/refetch posts in PostsList or use a shared state
-  // };
 
   return (
-    // This container provides padding and max-width for the content within the scrollable area.
-    // PostsList itself also has max-w-3xl, so this could be adjusted.
     <div className="mx-auto px-2 py-4 sm:px-4 sm:py-6">
-      {/* Optional: "Create Post" input-like bar at the top */}
       {isSession ? (
         <div className="mb-6">
           <div
@@ -64,7 +45,6 @@ const HomeMidBar = () => {
         isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
         onPostCreated={handlePostCreated}
-        // onPostCreated={handleNewPost} // See note above about post creation handling
       />
     </div>
   );
