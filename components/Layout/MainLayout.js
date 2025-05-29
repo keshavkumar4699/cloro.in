@@ -11,7 +11,7 @@ export default function MainLayout() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
-    <div className="flex flex-col h-screen bg-base-200">
+    <div className="flex flex-col h-screen">
       <Header toggleMobileMenu={() => setIsMobileOpen(!isMobileOpen)} />
       
       <div className="flex flex-1 overflow-hidden">

@@ -2,18 +2,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PostContent } from "./PostContent";
-import { PostHeader } from "./PostHeader";
-import { PostAuthor } from "./PostAuthor";
-import { PostStats } from "./PostStats";
+import Link from "next/link";
 import { PostSkeleton } from "./PostSkeleton";
 
-function PostsList() {
+export default function PostsList() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [followedPosts, setFollowedPosts] = useState({});
-  const [selectedPost, setSelectedPost] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -22,12 +17,6 @@ function PostsList() {
         const res = await fetch("/api/posts");
         const data = await res.json();
         setPosts(data);
-        
-        const initialFollowed = {};
-        data.forEach((post) => {
-          initialFollowed[post._id] = false;
-        });
-        setFollowedPosts(initialFollowed);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -38,24 +27,15 @@ function PostsList() {
     fetchPosts();
   }, []);
 
-  const toggleFollow = (postId) => {
-    setFollowedPosts((prev) => ({
-      ...prev,
-      [postId]: !prev[postId],
-    }));
-  };
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
 
-  const sharePost = (postId, e) => {
-    e.stopPropagation();
-    const postUrl = `${window.location.origin}/posts/${postId}`;
-    navigator.clipboard.writeText(postUrl).then(() => {
-      alert("Post link copied to clipboard!");
-    });
-  };
-
-  const handlePostClick = (postId) => {
-    setSelectedPost(postId === selectedPost ? null : postId);
-    router.push(`/posts/${postId}`);
+    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
   };
 
   if (loading) return (
@@ -73,40 +53,83 @@ function PostsList() {
       {posts.map((post) => (
         <div
           key={post._id}
-          className={`card rounded-xl p-4 transition-all duration-300 border cursor-pointer ${
-            selectedPost === post._id
-              ? "bg-base-300 border-primary/50 shadow-md"
-              : "bg-base-100 border-base-300 hover:bg-base-200 hover:border-primary/20 hover:shadow-lg"
-          }`}
-          onClick={() => handlePostClick(post._id)}
+          className="card rounded-xl p-4 transition-all duration-300 border cursor-pointer bg-base-200 border-base-300 hover:bg-base-300 hover:border-primary/20 hover:shadow-lg"
+          onClick={() => router.push(`/posts/${post._id}`)}
         >
-          <PostHeader
-            post={post}
-            isFollowing={followedPosts[post._id]}
-            onToggleFollow={() => toggleFollow(post._id)}
-          />
+          {/* Post Header - User info and metadata */}
+          <div className="flex items-start gap-3 mb-3">
+            {/* User Avatar - Made smaller */}
+            <Link 
+              href={`/users/${post.author?.username || "anonymous"}`}
+              onClick={(e) => e.stopPropagation()}
+              className="flex-shrink-0"
+            >
+              <div className="avatar">
+                <div className="w-8 h-8 rounded-full ring-1 ring-primary/50 hover:ring-primary transition-all duration-300">
+                  {post.author?.image ? (
+                    <img
+                      src={post.author.image}
+                      alt={post.author.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="bg-neutral text-neutral-content w-full h-full rounded-full flex items-center justify-center text-xs">
+                      {post.author?.name?.charAt(0) || "U"}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Link>
 
-          <div className={`rounded-xl p-3 my-3 transition-all duration-300 ${
-            selectedPost === post._id ? "bg-base-200" : "bg-gradient-to-br from-base-200/50 to-base-300/50"
-          }`}>
-            <PostContent 
-              content={post.content} 
-              imageUrl={post.imageUrl} 
-              isSelected={selectedPost === post._id} 
-            />
+            {/* Post title and user info */}
+            <div className="flex-1 min-w-0">
+              {/* Single line for title, views, and time that can wrap */}
+              <div className="flex flex-wrap items-center gap-x-2 text-sm">
+                <h3 className="font-semibold truncate hover:text-primary transition-colors">
+                  {post.title}
+                </h3>
+                <span className="text-base-content/50">•</span>
+                <span className="text-base-content/50">
+                  {post.views || 0} views
+                </span>
+                <span className="text-base-content/50">•</span>
+                <span className="text-base-content/50">
+                  {formatTimeAgo(post.createdAt)}
+                </span>
+              </div>
+              
+              <Link
+                href={`/users/${post.author?.username || "anonymous"}`}
+                onClick={(e) => e.stopPropagation()}
+                className="text-sm text-base-content/70 hover:text-neutral-700 transition-colors"
+              >
+                @{post.author?.username || "user"}
+              </Link>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between mt-2">
-            <PostAuthor author={post.author} />
-            <PostStats 
-              post={post} 
-              onShare={(e) => sharePost(post._id, e)} 
-            />
+          {/* Post Content - Clickable area excluded */}
+          <div 
+            className="rounded-xl p-3 bg-gradient-to-br bg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {post.content && (
+              <p className="text-base-content/90 text-sm mb-3 leading-relaxed">
+                {post.content}
+              </p>
+            )}
+            {post.imageUrl && (
+              <div className="rounded-lg overflow-hidden max-h-96 flex justify-center bg-gradient-to-br from-base-200 to-base-300 transition-all duration-300 hover:shadow-lg">
+                <img
+                  src={post.imageUrl}
+                  alt="Post content"
+                  className="object-contain max-h-96 w-full hover:scale-[1.02] transition-transform duration-500 ease-in-out"
+                />
+              </div>
+            )}
           </div>
         </div>
       ))}
     </div>
   );
 }
-
-export default PostsList;

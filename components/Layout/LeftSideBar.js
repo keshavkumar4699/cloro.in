@@ -1,6 +1,6 @@
 "use client";
 import Logo from "../Logo";
-import { XMarkIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
+import { XMarkIcon } from "@heroicons/react/24/solid";
 import SidebarLink from "./SidebarLink";
 import { navlinks } from "@/data/navlink";
 import { topics } from "@/data/topic";
@@ -61,7 +61,7 @@ export default function LeftSidebar({ isMobileOpen, onMobileClose }) {
         {/* Footer */}
         <div className="p-4 border-t border-base-300">
           <p className="text-xs text-base-content/60 text-center">
-            © {new Date().getFullYear()} Your App
+            © {new Date().getFullYear()} Cloro
           </p>
         </div>
       </aside>

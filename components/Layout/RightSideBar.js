@@ -17,14 +17,14 @@ export default function RightSideBar() {
     <div className="h-full flex flex-col"> 
       {/* The aside will take up all available space and scroll its content. */}
       <aside className="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar">
-        <h2 className="text-sm font-semibold mb-4 text-base-content/80 tracking-wider uppercase">
+        <h2 className="text-xs font-semibold mb-4 text-base-content/80 tracking-wider uppercase">
           Trending Now
         </h2>
         <div className="space-y-3">
           {trendingItems.map((item) => (
             <div
               key={item.id}
-              className="bg-base-200/70 hover:bg-base-300/80 transition-all duration-200 ease-in-out p-3 rounded-lg shadow-sm hover:shadow-md cursor-pointer"
+              className="bg-base-200/70 hover:bg-base-300/80 transition-all duration-200 ease-in-out p-3 rounded-lg hover:shadow-sm cursor-pointer border border-base-300"
             >
               <div className="flex items-center text-xs text-primary mb-0.5">
                 {item.icon}
@@ -44,17 +44,17 @@ export default function RightSideBar() {
         <div className="divider my-6"></div>
 
         <div>
-          <h2 className="text-sm font-semibold mb-3 text-base-content/80 tracking-wider uppercase">
+          <h2 className="text-xs font-semibold mb-3 text-base-content/80 tracking-wider uppercase">
             Filters
           </h2>
           <div className="form-control space-y-2">
             <label className="cursor-pointer label justify-start gap-2">
               <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" />
-              <span className="label-text text-sm">Show All</span>
+              <span className="label-text text-xs">Show All</span>
             </label>
             <label className="cursor-pointer label justify-start gap-2">
               <input type="checkbox" className="checkbox checkbox-sm" />
-              <span className="label-text text-sm">Only Following</span>
+              <span className="label-text text-xs">Only Following</span>
             </label>
           </div>
         </div>
