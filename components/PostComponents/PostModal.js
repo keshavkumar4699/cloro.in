@@ -144,7 +144,7 @@ export default function PostModal({ isOpen, onClose, onPostCreated }) {
             <XMarkIcon className="w-5 h-5" />
           </button>
 
-          <h3 className="text-2xl font-bold mb-4">Create New Post</h3>
+          <h3 className="text-xl font-bold mb-2">Create New Post</h3>
 
           {error && (
             <div className="alert alert-error mb-4">
@@ -165,7 +165,7 @@ export default function PostModal({ isOpen, onClose, onPostCreated }) {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-2">
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Title</span>

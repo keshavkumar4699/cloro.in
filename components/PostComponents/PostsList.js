@@ -1,15 +1,16 @@
 // components/PostsList.jsx
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { PostSkeleton } from "./PostSkeleton";
 
-export default function PostsList() {
+export default function PostsList({ onPostSelect }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -27,6 +28,16 @@ export default function PostsList() {
     fetchPosts();
   }, []);
 
+  const handlePostClick = (postId) => {
+    // Update URL without page reload
+    router.push(`${pathname}?post=${postId}`, { scroll: false });
+    // Notify parent component to update content
+    if (onPostSelect) {
+      const post = posts.find((p) => p._id === postId);
+      onPostSelect(post);
+    }
+  };
+
   const formatTimeAgo = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -34,19 +45,22 @@ export default function PostsList() {
 
     if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)}h ago`;
     return `${Math.floor(diffInSeconds / 86400)}d ago`;
   };
 
-  if (loading) return (
-    <div className="space-y-4 animate-pulse">
-      {[...Array(3)].map((_, i) => (
-        <PostSkeleton key={i} />
-      ))}
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="space-y-4 animate-pulse">
+        {[...Array(3)].map((_, i) => (
+          <PostSkeleton key={i} />
+        ))}
+      </div>
+    );
 
-  if (error) return <div className="text-error text-center mt-8">Error: {error}</div>;
+  if (error)
+    return <div className="text-error text-center mt-8">Error: {error}</div>;
 
   return (
     <div className="space-y-4">
@@ -54,12 +68,12 @@ export default function PostsList() {
         <div
           key={post._id}
           className="card rounded-xl p-4 transition-all duration-300 border cursor-pointer bg-base-200 border-base-300 hover:bg-base-300 hover:border-primary/20 hover:shadow-lg"
-          onClick={() => router.push(`/posts/${post._id}`)}
+          onClick={() => handlePostClick(post._id)}
         >
           {/* Post Header - User info and metadata */}
           <div className="flex items-start gap-3 mb-3">
             {/* User Avatar - Made smaller */}
-            <Link 
+            <Link
               href={`/users/${post.author?.username || "anonymous"}`}
               onClick={(e) => e.stopPropagation()}
               className="flex-shrink-0"
@@ -97,7 +111,7 @@ export default function PostsList() {
                   {formatTimeAgo(post.createdAt)}
                 </span>
               </div>
-              
+
               <Link
                 href={`/users/${post.author?.username || "anonymous"}`}
                 onClick={(e) => e.stopPropagation()}
@@ -109,10 +123,8 @@ export default function PostsList() {
           </div>
 
           {/* Post Content - Clickable area excluded */}
-          <div 
-            className="rounded-xl p-3 bg-gradient-to-br bg"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div
+            className="rounded-xl p-3 bg-gradient-to-br bg">
             {post.content && (
               <p className="text-base-content/90 text-sm mb-3 leading-relaxed">
                 {post.content}
