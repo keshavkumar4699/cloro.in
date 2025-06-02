@@ -1,6 +1,7 @@
 // models/Post.js
 import mongoose from "mongoose";
 import "./User";
+import "./Chain"
 
 const PostSchema = new mongoose.Schema({
   title: {
@@ -22,6 +23,10 @@ const PostSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+  },
+  chain:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Chain"
   },
   imageUrl: {
     type: String,

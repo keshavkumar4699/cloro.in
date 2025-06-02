@@ -1,47 +1,49 @@
+// components/HomeMidBar.js
 "use client";
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+
+import { Suspense } from "react"; // Import Suspense
 import { useSearchParams } from "next/navigation";
+// Removed: import { useSession } from "next-auth/react"; // Not directly used for view logic here
 import PostsList from "@/components/PostComponents/PostsList";
-import SinglePostView from "@/components/PostComponents/SinglePostView";
+import ChainView from "@/components/ChainComponents/ChainView"; // Adjust path if needed
+
+// Content component to handle searchParams logic
+const HomeMidBarContent = () => {
+  const searchParams = useSearchParams();
+  const chainIdFromUrl = searchParams.get('chainId');
+  const postIdFromUrl = searchParams.get('postId'); // To highlight specific post in chain
+
+  if (chainIdFromUrl) {
+    // If chainId is in URL, display the ChainView
+    return <ChainView chainId={chainIdFromUrl} currentPostIdInChain={postIdFromUrl} />;
+  } else {
+    // Otherwise, display the PostsList
+    return <PostsList />;
+  }
+};
 
 const HomeMidBar = () => {
-  const { data: isSession } = useSession();
-  const [selectedPost, setSelectedPost] = useState(null);
-  const searchParams = useSearchParams();
-  const postId = searchParams.get('post');
-
-  useEffect(() => {
-    if (postId) {
-      // Fetch the single post when URL changes
-      const fetchPost = async () => {
-        try {
-          const res = await fetch(`/api/posts/${postId}`);
-          const data = await res.json();
-          setSelectedPost(data);
-        } catch (error) {
-          console.error("Error fetching post:", error);
-        }
-      };
-      fetchPost();
-    } else {
-      setSelectedPost(null);
-    }
-  }, [postId]);
-
-  const handlePostSelect = (post) => {
-    setSelectedPost(post);
-  };
+  // const { data: isSession } = useSession(); // Can be kept if other logic in HomeMidBar depends on session
 
   return (
-    <div className="mx-auto px-2 py-4 sm:px-4 sm:py-6">
-      {selectedPost ? (
-        <SinglePostView post={selectedPost} />
-      ) : (
-        <PostsList onPostSelect={handlePostSelect} />
-      )}
+    <div className="mx-auto">
+      {/*
+        Wrap the component that uses useSearchParams in Suspense.
+        This is a requirement in Next.js App Router when reading searchParams
+        during rendering, as it can cause the component to suspend.
+      */}
+      <Suspense fallback={<LoadingState />}>
+        <HomeMidBarContent />
+      </Suspense>
     </div>
   );
 };
+
+// Basic loading state for Suspense fallback
+const LoadingState = () => (
+  <div className="flex justify-center items-center py-10">
+    <span className="loading loading-lg loading-dots text-primary"></span>
+  </div>
+);
 
 export default HomeMidBar;
