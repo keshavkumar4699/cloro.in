@@ -1,3 +1,4 @@
+// app/layout.js
 import { Inter } from "next/font/google";
 import { getSEOTags } from "@/libs/seo";
 import ClientLayout from "@/components/LayoutClient";

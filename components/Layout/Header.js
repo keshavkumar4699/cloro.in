@@ -1,10 +1,15 @@
+// components/Layout/Header.js
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Logo from "../Logo";
-import AuthModal from "./AuthModal/AuthModal";
-import ButtonSignin from "./ButtonSignin";
-import { PlusIcon, MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import AuthModal from "../Auth/AuthModal/AuthModal";
+import ButtonSignin from "../Auth/ButtonSignin";
+import {
+  PlusIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid";
 
 const Header = ({ toggleMobileMenu }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -16,7 +21,8 @@ const Header = ({ toggleMobileMenu }) => {
   const searchInputRef = useRef(null);
 
   useEffect(() => {
-    if (isAuthModalOpen || showMobileSearchInput) { // Lock scroll if modal or mobile search is open
+    if (isAuthModalOpen || showMobileSearchInput) {
+      // Lock scroll if modal or mobile search is open
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -47,13 +53,13 @@ const Header = ({ toggleMobileMenu }) => {
       console.log("Searching for:", searchQuery);
       // router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
       if (showMobileSearchInput) {
-        setShowMobileSearchInput(false); 
+        setShowMobileSearchInput(false);
       }
     }
   };
 
   const handleCreatePostClick = () => {
-    router.push('/posts/create');
+    router.push("/posts/create");
   };
 
   const toggleMobileSearchVisibility = () => {
@@ -71,12 +77,27 @@ const Header = ({ toggleMobileMenu }) => {
               className="lg:hidden btn btn-ghost btn-square p-2"
               aria-label="Open menu"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </button>
             {/* Logo: Hidden on small screens when mobile search input is active */}
-            <div className={`${showMobileSearchInput ? 'hidden' : 'flex'} md:flex items-center`}>
+            <div
+              className={`${
+                showMobileSearchInput ? "hidden" : "flex"
+              } md:flex items-center`}
+            >
               <Logo />
             </div>
           </div>
@@ -89,7 +110,9 @@ const Header = ({ toggleMobileMenu }) => {
                   type="text"
                   placeholder="Search posts..."
                   className={`input input-bordered w-full pl-10 pr-4 py-2.5 rounded-full text-sm transition-colors duration-200 ${
-                    isSearchFocused ? "bg-base-200 border-primary" : "bg-base-100 border-base-300"
+                    isSearchFocused
+                      ? "bg-base-200 border-primary"
+                      : "bg-base-100 border-base-300"
                   } focus:outline-none focus:ring-1 focus:ring-primary`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -110,7 +133,9 @@ const Header = ({ toggleMobileMenu }) => {
           {/* Right Group: Mobile Search Toggle, Create, Auth Buttons */}
           {/* This entire group is hidden if the mobile search input overlay is active */}
           {!showMobileSearchInput && (
-            <div className="flex items-center gap-1 sm:gap-2"> {/* Adjusted gap for potentially 3 icons */}
+            <div className="flex items-center gap-1 sm:gap-2">
+              {" "}
+              {/* Adjusted gap for potentially 3 icons */}
               {/* Mobile Search Toggle Button - visible only on mobile (md:hidden) */}
               <button
                 className="md:hidden btn btn-ghost btn-square p-2"
@@ -119,7 +144,6 @@ const Header = ({ toggleMobileMenu }) => {
               >
                 <MagnifyingGlassIcon className="h-6 w-6" />
               </button>
-
               {/* Create Post Button */}
               <button
                 onClick={handleCreatePostClick}
@@ -128,7 +152,6 @@ const Header = ({ toggleMobileMenu }) => {
                 <PlusIcon className="h-5 w-5" />
                 <span>Create</span> {/* Text is always visible */}
               </button>
-
               {/* Auth Button/Component */}
               <ButtonSignin
                 onOpenLoginModal={() => openAuthModal("login")}
@@ -140,8 +163,13 @@ const Header = ({ toggleMobileMenu }) => {
 
         {/* Mobile Search Input Overlay (covers header content on mobile when active) */}
         {showMobileSearchInput && (
-          <div className="md:hidden absolute top-0 left-0 right-0 w-full z-50 bg-base-100 p-3 border-b border-base-300 shadow-lg"> {/* Added shadow-lg */}
-            <form onSubmit={handleSearch} className="relative w-full flex items-center gap-2">
+          <div className="md:hidden absolute top-0 left-0 right-0 w-full z-50 bg-base-100 p-3 border-b border-base-300 shadow-lg">
+            {" "}
+            {/* Added shadow-lg */}
+            <form
+              onSubmit={handleSearch}
+              className="relative w-full flex items-center gap-2"
+            >
               <button // Search icon inside input bar
                 type="submit"
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 hover:text-primary"

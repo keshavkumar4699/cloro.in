@@ -1,4 +1,4 @@
-// RightSideBar.js
+//components/Layout/RightSideBar.js
 "use client";
 // Example icons if you want to add them
 import { FireIcon, ChartBarIcon, CogIcon } from '@heroicons/react/24/outline'; 
