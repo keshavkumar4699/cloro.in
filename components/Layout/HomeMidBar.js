@@ -2,28 +2,9 @@
 "use client";
 
 import { Suspense } from "react"; // Import Suspense
-import { useSearchParams } from "next/navigation";
-// Removed: import { useSession } from "next-auth/react"; // Not directly used for view logic here
 import PostsList from "@/components/PostComponents/PostsList";
-import ChainView from "@/components/ChainComponents/ChainView"; // Adjust path if needed
-
-// Content component to handle searchParams logic
-const HomeMidBarContent = () => {
-  const searchParams = useSearchParams();
-  const chainIdFromUrl = searchParams.get('chainId');
-  const postIdFromUrl = searchParams.get('postId'); // To highlight specific post in chain
-
-  if (chainIdFromUrl) {
-    // If chainId is in URL, display the ChainView
-    return <ChainView chainId={chainIdFromUrl} currentPostIdInChain={postIdFromUrl} />;
-  } else {
-    // Otherwise, display the PostsList
-    return <PostsList />;
-  }
-};
 
 const HomeMidBar = () => {
-  // const { data: isSession } = useSession(); // Can be kept if other logic in HomeMidBar depends on session
 
   return (
     <div className="mx-auto">
@@ -33,7 +14,7 @@ const HomeMidBar = () => {
         during rendering, as it can cause the component to suspend.
       */}
       <Suspense fallback={<LoadingState />}>
-        <HomeMidBarContent />
+        <PostsList />
       </Suspense>
     </div>
   );

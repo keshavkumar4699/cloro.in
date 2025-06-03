@@ -1,9 +1,8 @@
 // app/page.js
-import MainLayout from "@/components/Layout/MainLayout";
+import HomeMidBar from "@/components/Layout/HomeMidBar";
 
 export default function Home() {
   return (
-    <MainLayout>
-    </MainLayout>
+    <HomeMidBar/>
   );
 }

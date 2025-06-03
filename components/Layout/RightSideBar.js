@@ -1,10 +1,8 @@
-//components/Layout/RightSideBar.js
 "use client";
-// Example icons if you want to add them
-import { FireIcon, ChartBarIcon, CogIcon } from '@heroicons/react/24/outline'; 
+import { memo } from "react";
+import { FireIcon, ChartBarIcon, CogIcon } from '@heroicons/react/24/outline';
 
-export default function RightSideBar() {
-  // Mock data for trending items
+const RightSideBar = memo(() => {
   const trendingItems = [
     { id: 1, title: "The Future of AI", views: "10.2k", category: "Technology", icon: <FireIcon className="w-4 h-4 mr-1.5 text-error" /> },
     { id: 2, title: "New Space Discoveries", views: "8.7k", category: "Science", icon: <ChartBarIcon className="w-4 h-4 mr-1.5 text-info" /> },
@@ -13,10 +11,8 @@ export default function RightSideBar() {
   ];
 
   return (
-    // The parent div in MainLayout controls width and visibility. This div fills height.
-    <div className="h-full flex flex-col"> 
-      {/* The aside will take up all available space and scroll its content. */}
-      <aside className="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar">
+    <div className="h-full flex flex-col">
+      <aside className="flex-1 overflow-y-auto p-4 md:p-5">
         <h2 className="text-xs font-semibold mb-4 text-base-content/80 tracking-wider uppercase">
           Trending Now
         </h2>
@@ -24,7 +20,7 @@ export default function RightSideBar() {
           {trendingItems.map((item) => (
             <div
               key={item.id}
-              className="bg-base-200/70 hover:bg-base-300/80 transition-all duration-200 ease-in-out p-3 rounded-lg hover:shadow-sm cursor-pointer border border-base-300"
+              className="bg-base-200/70 hover:bg-base-300/80 transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] p-3 rounded-lg hover:shadow-sm cursor-pointer border border-base-300"
             >
               <div className="flex items-center text-xs text-primary mb-0.5">
                 {item.icon}
@@ -40,7 +36,6 @@ export default function RightSideBar() {
           ))}
         </div>
 
-        {/* You can add more sections here, e.g., "Recommended Users", "Ads", etc. */}
         <div className="divider my-6"></div>
 
         <div>
@@ -48,12 +43,12 @@ export default function RightSideBar() {
             Filters
           </h2>
           <div className="form-control space-y-2">
-            <label className="cursor-pointer label justify-start gap-2">
-              <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" />
+            <label className="cursor-pointer label justify-start gap-2 hover:bg-base-200/50 rounded-lg px-2 transition-colors duration-150">
+              <input type="checkbox" className="checkbox checkbox-sm checkbox-primary transition-colors duration-150" />
               <span className="label-text text-xs">Show All</span>
             </label>
-            <label className="cursor-pointer label justify-start gap-2">
-              <input type="checkbox" className="checkbox checkbox-sm" />
+            <label className="cursor-pointer label justify-start gap-2 hover:bg-base-200/50 rounded-lg px-2 transition-colors duration-150">
+              <input type="checkbox" className="checkbox checkbox-sm transition-colors duration-150" />
               <span className="label-text text-xs">Only Following</span>
             </label>
           </div>
@@ -61,4 +56,7 @@ export default function RightSideBar() {
       </aside>
     </div>
   );
-}
+});
+
+RightSideBar.displayName = "RightSideBar";
+export default RightSideBar;
