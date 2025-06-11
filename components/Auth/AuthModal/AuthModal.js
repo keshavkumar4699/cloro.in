@@ -1,25 +1,25 @@
+// components/Auth/AuthModal/AuthModal.js
 "use client";
-import { useState, useEffect } from "react";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
+import { useAuthModal } from "@/context/AuthModalContext";
+import { useRouter } from "next/navigation";
 
-const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
-  const [mode, setMode] = useState(initialMode);
-  const [error, setError] = useState('');
+export default function AuthModal()  {
+  const { 
+    isOpen, 
+    mode, 
+    closeModal, 
+    callbackUrl,
+    openModal,
+  } = useAuthModal();
+  
+  const router = useRouter();
 
-  useEffect(() => {
-    if (isOpen) {
-      setMode(initialMode);
-      setError('');
-    }
-  }, [isOpen, initialMode]);
-
-  const handleClose = () =>{
-    if(onClose) {
-      onClose();
-    } else {
-      window.location.href = '/';
-    }
+  const handleSuccess = () => {
+    closeModal();
+    router.replace(callbackUrl||'/');
+    router.refresh();
   };
 
   return (
@@ -27,7 +27,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
       <div className="modal-box w-11/12 max-w-md p-6 md:p-8 rounded-lg shadow-xl bg-base-100 relative">
         <button 
           type="button"
-          onClick={onClose}
+          onClick={closeModal}
           className="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 z-10"
         >
           ✕
@@ -35,26 +35,20 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
         {mode === 'login' ? (
           <LoginForm 
-            onClose={handleClose}
-            onSwitchToRegister={() => setMode('register')}
-            error={error}
-            setError={setError}
+            onSuccess={handleSuccess}
+            onSwitchToRegister={() => openModal("register", callbackUrl)} // Use the destructured openModal
           />
         ) : (
           <RegisterForm 
-            onClose={handleClose}
-            onSwitchToLogin={() => setMode('login')}
-            error={error}
-            setError={setError}
+            onSuccess={handleSuccess}
+            onSwitchToLogin={() => openModal("login", callbackUrl)} // Use the destructured openModal
           />
         )}
       </div>
       
       <form method="dialog" className="modal-backdrop">
-        <button type="button" onClick={handleClose}>close</button>
+        <button type="button" onClick={closeModal}>close</button>
       </form>
     </dialog>
   );
-};
-
-export default AuthModal;
+}

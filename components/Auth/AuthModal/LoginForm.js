@@ -1,42 +1,43 @@
+// components/Auth/AuthModal/LoginForm.jsx
 "use client";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import config from "@/config";
 
-const LoginForm = ({ onClose, onSwitchToRegister, error, setError }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const LoginForm = ({ onSuccess, onSwitchToRegister }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleCredentialsLogin = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
     
     try {
-      const result = await signIn('credentials', {
+      const result = await signIn("credentials", {
         redirect: false,
         email,
         password,
-        callbackUrl: config.auth.callbackUrl || '/',
       });
 
-      setLoading(false);
       if (result?.error) {
         setError(result.error === "CredentialsSignin" ? "Invalid email or password." : result.error);
       } else if (result?.ok) {
-        onClose();
+        onSuccess();
       }
     } catch (err) {
-      setLoading(false);
       setError("An unexpected error occurred. Please try again.");
       console.error("Login error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleSignIn = () => {
     setLoading(true);
-    signIn('google', { callbackUrl: config.auth.callbackUrl || '/' });
+    signIn("google");
   };
 
   return (

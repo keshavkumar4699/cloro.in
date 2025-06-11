@@ -5,11 +5,12 @@ import { authOptions } from "@/libs/next-auth";
 import config from "@/config";
 import "./globals.css";
 import AppLayout from "@/components/Layout/AppLayout";
+import { AuthModalProvider } from "@/context/AuthModalContext";
 
 const font = Inter({ subsets: ["latin"] });
 
 export const viewport = {
-	// Will use the primary color of your theme to show a nice theme color in the URL bar of supported browsers
+  // Will use the primary color of your theme to show a nice theme color in the URL bar of supported browsers
   themeColor: config.colors.main,
   width: "device-width",
   initialScale: 1,
@@ -26,7 +27,9 @@ export default async function RootLayout({ children }) {
     <html lang="en" data-theme={config.colors.theme} className={font.className}>
       <body className="min-h-screen flex flex-col">
         {/* ClientLayout contains all the client wrappers (Crisp chat support, toast messages, tooltips, etc.) */}
-        <AppLayout session={session}>{children}</AppLayout>
+        <AuthModalProvider>
+          <AppLayout session={session}>{children}</AppLayout>
+        </AuthModalProvider>
       </body>
     </html>
   );

@@ -1,33 +1,27 @@
-/* eslint-disable @next/next/no-img-element */
+// components/Auth/ButtonSignin.jsx
 "use client";
-
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import config from "@/config";
+import { useAuthModal } from "@/context/AuthModalContext";
 import { useRouter } from "next/navigation";
 
-const ButtonSignin = ({ text = "SignIn", extraStyle, onOpenLoginModal}) => {
+const ButtonSignin = ({ text = "Sign In", extraStyle }) => {
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { openModal } = useAuthModal();
 
   const handleClick = () => {
     if (status === "authenticated") {
-      router.push(config.auth.callbackUrl);
+      router.push("/dashboard"); // Or your default authenticated route
     } else {
-      // If onOpenLoginModal is provided (for in-page modals)
-      if (onOpenLoginModal) {
-        onOpenLoginModal('login');
-      } else {
-        // Otherwise redirect to the auth page that will show the modal
-        router.push('/auth?mode=login');
-      }
+      openModal("login");
     }
   };
 
   if (status === "authenticated") {
     return (
       <Link
-        href={config.auth.callbackUrl}
+        href="/dashboard"
         className={`btn ${extraStyle ? extraStyle : ""}`}
       >
         {session.user?.image ? (
@@ -50,13 +44,13 @@ const ButtonSignin = ({ text = "SignIn", extraStyle, onOpenLoginModal}) => {
   }
 
   return (
-      <button
-        className={`btn ${extraStyle ? extraStyle : ""}`}
-        onClick={handleClick}
-      >
-        {text}
-      </button>
-    );
+    <button
+      className={`btn ${extraStyle ? extraStyle : ""}`}
+      onClick={handleClick}
+    >
+      {text}
+    </button>
+  );
 };
 
 export default ButtonSignin;

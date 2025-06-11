@@ -2,50 +2,45 @@
 import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useRouter } from "next/navigation";
 import Logo from "../Logo";
-import AuthModal from "../Auth/AuthModal/AuthModal";
+import { useProtectedAction } from "@/hooks/useProtectedAction";
 import ButtonSignin from "../Auth/ButtonSignin";
 import {
   PlusIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
-  Bars3Icon
+  Bars3Icon,
 } from "@heroicons/react/24/solid";
 
-const Header = memo(({ toggleMobileMenu, session }) => {
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState("login");
+const Header = memo(({ toggleMobileMenu }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [showMobileSearchInput, setShowMobileSearchInput] = useState(false);
   const router = useRouter();
+  const performProtectedAction = useProtectedAction();
   const searchInputRef = useRef(null);
 
   // Debounced search handler
-  const handleSearch = useCallback((e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      console.log("Searching for:", searchQuery);
-      if (showMobileSearchInput) {
-        setShowMobileSearchInput(false);
+  const handleSearch = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (searchQuery.trim()) {
+        console.log("Searching for:", searchQuery);
+        if (showMobileSearchInput) {
+          setShowMobileSearchInput(false);
+        }
       }
-    }
-  }, [searchQuery, showMobileSearchInput]);
+    },
+    [searchQuery, showMobileSearchInput]
+  );
 
-  const openAuthModal = useCallback((mode) => {
-    setAuthModalMode(mode);
-    setIsAuthModalOpen(true);
-  }, []);
-
-  const closeAuthModal = useCallback(() => {
-    setIsAuthModalOpen(false);
-  }, []);
-
-  const handleCreatePostClick = useCallback(() => {
-    router.push("/posts/create");
-  }, [router]);
+  const handleCreatePostClick = () => {
+    performProtectedAction(() => {
+      router.push("/posts/create");
+    });
+  };
 
   const toggleMobileSearchVisibility = useCallback(() => {
-    setShowMobileSearchInput(prev => !prev);
+    setShowMobileSearchInput((prev) => !prev);
   }, []);
 
   // Focus management for mobile search
@@ -54,17 +49,6 @@ const Header = memo(({ toggleMobileMenu, session }) => {
       searchInputRef.current.focus();
     }
   }, [showMobileSearchInput]);
-
-  // Scroll lock management
-  useEffect(() => {
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    if (isAuthModalOpen || showMobileSearchInput) {
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.body.style.overflow = originalStyle;
-    };
-  }, [isAuthModalOpen, showMobileSearchInput]);
 
   return (
     <>
@@ -78,7 +62,11 @@ const Header = memo(({ toggleMobileMenu, session }) => {
             >
               <Bars3Icon className="h-6 w-6" />
             </button>
-            <div className={`${showMobileSearchInput ? "hidden" : "flex"} md:flex items-center`}>
+            <div
+              className={`${
+                showMobileSearchInput ? "hidden" : "flex"
+              } md:flex items-center`}
+            >
               <Logo />
             </div>
           </div>
@@ -126,11 +114,7 @@ const Header = memo(({ toggleMobileMenu, session }) => {
                 <PlusIcon className="h-5 w-5" />
                 <span>Create</span>
               </button>
-              <ButtonSignin
-                session={session}
-                onOpenLoginModal={() => openAuthModal("login")}
-                extraStyle="btn-primary btn-outline h-10 min-h-[2.5rem] px-3 rounded-full whitespace-nowrap transition-transform hover:scale-[1.02] active:scale-[0.98]"
-              />
+              <ButtonSignin extraStyle="btn-primary btn-outline h-10 min-h-[2.5rem] px-3 rounded-full whitespace-nowrap transition-transform hover:scale-[1.02] active:scale-[0.98]" />
             </div>
           )}
         </nav>
@@ -169,12 +153,6 @@ const Header = memo(({ toggleMobileMenu, session }) => {
           </div>
         )}
       </header>
-
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={closeAuthModal}
-        initialMode={authModalMode}
-      />
     </>
   );
 });
