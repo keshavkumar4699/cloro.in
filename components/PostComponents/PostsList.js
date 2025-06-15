@@ -1,9 +1,9 @@
 // components/PostComponents/PostsList.jsx
 "use client";
 import { useFetchPosts } from "@/hooks/useFetchPosts";
-import { PostCard } from "./PostCard";
+import PostCard from "./PostCard/PostCard";
 import { PostSkeleton } from "./PostSkeleton";
-import { PostsError } from "./PostsError";
+import PostsError from "./PostsError";
 
 export default function PostsList() {
   const { data: posts, loading, error, refetch } = useFetchPosts();
@@ -11,7 +11,9 @@ export default function PostsList() {
   if (loading) {
     return (
       <div className="space-y-4 animate-pulse">
-        {[...Array(3)].map((_, i) => <PostSkeleton key={i} />)}
+        {[...Array(3)].map((_, i) => (
+          <PostSkeleton key={i} />
+        ))}
       </div>
     );
   }

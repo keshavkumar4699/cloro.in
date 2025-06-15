@@ -18,7 +18,10 @@ progress::-webkit-progress-value {
   transition: 0.6s width ease-out;
 }
 
-/* app/globals.css */
+.highlight-post {
+  border-radius: 10px;
+  animation: 2s ease-out;
+}
 
 /* Wrapper for inputs where the label should disappear on focus or on typing */
 .form-control-disappearing-label {
