@@ -18,6 +18,31 @@ progress::-webkit-progress-value {
   transition: 0.6s width ease-out;
 }
 
+/* app/globals.css */
+
+/* Wrapper for inputs where the label should disappear on focus or on typing */
+.form-control-disappearing-label {
+  position: relative;
+}
+
+/* The label that sits inside the input area */
+.form-control-disappearing-label > label {
+  position: absolute;
+  top: 50%;
+  left: 1.1rem; /* Aligns with input padding (pl-4) + border */
+  transform: translateY(-50%);
+  pointer-events: none; /* Let clicks pass through to the input */
+  color: hsl(var(--bc) / 0.5); /* DaisyUI base-content color with opacity */
+}
+
+/* When the input is FOCUSED OR has text, hide the label */
+.form-control-disappearing-label > input:focus + label,
+.form-control-disappearing-label > input:not(:placeholder-shown) + label,
+.form-control-disappearing-label > textarea:focus + label,
+.form-control-disappearing-label > textarea:not(:placeholder-shown) + label {
+  opacity: 0;
+}
+
 @layer base {
   .btn-gradient {
     @apply !bg-gradient !bg-[length:300%_300%] hover:saturate-[1.2] shadow duration-100 !border-0 !border-transparent !bg-transparent animate-shimmer disabled:!bg-none disabled:!bg-gray-500/30  !text-white;

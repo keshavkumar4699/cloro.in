@@ -17,7 +17,6 @@ export default function PostsList() { // Removed onPostSelect prop
       setLoading(true);
       setError(null); // Reset error on new fetch
       try {
-        // Ensure this API returns posts with 'chainId' and other necessary fields like 'author.username'
         const res = await fetch("/api/posts");
         if (!res.ok) {
           const errData = await res.json().catch(() => ({ message: "Server error" }));
