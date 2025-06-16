@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { PhotoIcon, ExclamationCircleIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { debounce } from "lodash";
+import { categories } from "@/data/categories";
+import ChainSearchDropdown from "./ChainSearchDropdown";
+import ImageUploadButton from "./ImageUploadButton";
+import ErrorMessage from "./ErrorMessage";
 
 export default function CreatePostPage() {
-  const { data: session, status: sessionStatus } = useSession();
+  const { status: sessionStatus } = useSession();
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -21,71 +23,16 @@ export default function CreatePostPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   
-  const [chainSearchInput, setChainSearchInput] = useState("");
-  const [chainSearchResults, setChainSearchResults] = useState([]);
-  const [isChainSearching, setIsChainSearching] = useState(false);
-  const [showChainDropdown, setShowChainDropdown] = useState(false);
-
   const fileInputRef = useRef(null);
-  const chainSearchRef = useRef(null);
-  const dropdownRef = useRef(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (chainSearchRef.current && !chainSearchRef.current.contains(event.target)) {
-        setShowChainDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Auto-size textarea
   const textareaRef = useRef(null);
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [formData.content]);
 
-  // Debounced chain search
-  const debouncedChainSearch = useCallback(
-    debounce(async (searchTerm) => {
-      if (searchTerm.trim().length < 1) {
-        setChainSearchResults([]);
-        setIsChainSearching(false);
-        return;
-      }
-      setIsChainSearching(true);
-      try {
-        const response = await fetch(`/api/posts/chains?search=${encodeURIComponent(searchTerm)}&limit=5`);
-        if (!response.ok) throw new Error("Failed to fetch chains");
-        let results = await response.json();
-        const exactMatchExists = results.some(c => c.title.toLowerCase() === searchTerm.trim().toLowerCase());
-        if (!exactMatchExists) {
-            results.unshift({ _id: "create_new_chain_option", title: searchTerm.trim(), isCreateOption: true });
-        }
-        setChainSearchResults(results);
-      } catch (err) {
-        console.error("Chain search failed:", err);
-      } finally {
-        setIsChainSearching(false);
-      }
-    }, 300),
-    []
-  );
-
-  useEffect(() => {
-    debouncedChainSearch(chainSearchInput);
-  }, [chainSearchInput, debouncedChainSearch]);
-
-  const handleChainSelect = (chain) => {
-    setSelectedChain(chain);
-    setChainSearchInput(chain.title);
-    setShowChainDropdown(false);
-  };
+  // // Auto-size textarea
+  // useEffect(() => {
+  //   if (textareaRef.current) {
+  //     textareaRef.current.style.height = "auto";
+  //     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+  //   }
+  // }, [formData.content]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -138,6 +85,7 @@ export default function CreatePostPage() {
   if (sessionStatus === "loading") {
     return <div className="flex justify-center items-center h-screen"><span className="loading loading-dots loading-lg"></span></div>;
   }
+  
   if (sessionStatus === "unauthenticated") {
     return (
       <div className="flex flex-col justify-center items-center h-screen p-4 text-center">
@@ -163,58 +111,11 @@ export default function CreatePostPage() {
       </div>
 
       <form id="create-post-form" onSubmit={handleSubmit} className="flex flex-col flex-1 gap-4">
-        {/* Chain Search - Custom Dropdown */}
-        <div className="form-control" ref={chainSearchRef}>
-          <div className="relative">
-            <input
-              type="text"
-              className="input input-bordered w-full pl-4 pr-10 text-sm"
-              value={chainSearchInput}
-              onChange={(e) => {
-                setChainSearchInput(e.target.value);
-                setShowChainDropdown(true);
-              }}
-              onFocus={() => setShowChainDropdown(true)}
-              placeholder="Search or create a chain (optional)"
-            />
-            <button
-              type="button"
-              className="absolute inset-y-0 right-0 flex items-center pr-3"
-              onClick={() => setShowChainDropdown(!showChainDropdown)}
-            >
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          </div>
-          
-          {showChainDropdown && (
-            <div ref={dropdownRef} className="absolute z-10 mt-10 bg-base-100 border border-base-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-              {isChainSearching ? (
-                <div className="p-2 text-sm text-center">Searching...</div>
-              ) : chainSearchResults.length === 0 ? (
-                <div className="p-2 text-sm text-center">No results found</div>
-              ) : (
-                chainSearchResults.map((chain) => (
-                  <div
-                    key={chain._id}
-                    className={`p-2 text-sm cursor-pointer hover:bg-base-200 ${selectedChain?._id === chain._id ? 'bg-base-200' : ''}`}
-                    onClick={() => handleChainSelect(chain)}
-                  >
-                    {chain.isCreateOption ? (
-                      <div className="flex items-center gap-2">
-                        <PlusIcon className="w-4 h-4" />
-                        <span>Create &quot;{chain.title}&quot;</span>
-                      </div>
-                    ) : (
-                      chain.title
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
+        <ChainSearchDropdown
+          selectedChain={selectedChain}
+          setSelectedChain={setSelectedChain}
+          isSubmitting={isSubmitting}
+        />
 
         {/* Title */}
         <div className="form-control">
@@ -255,30 +156,22 @@ export default function CreatePostPage() {
             disabled={isSubmitting}
           >
             <option value="" disabled>Choose a category</option>
-            <option value="technology">Technology</option>
-            <option value="lifestyle">Lifestyle</option>
-            <option value="education">Education</option>
-            <option value="discussion">Discussion</option>
+            {categories.map((category) => (
+              <option key={category.value} value={category.value}>
+                {category.label}
+              </option>
+            ))}
           </select>
 
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className={`btn btn-outline justify-start text-left text-sm ${formData.imageName ? 'border-primary' : ''}`}
-            disabled={isSubmitting}
-          >
-            <PhotoIcon className="w-5 h-5 mr-2" />
-            {formData.imageName || "Upload Image"}
-          </button>
-          <input type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange} className="hidden" />
+          <ImageUploadButton
+            fileInputRef={fileInputRef}
+            handleFileChange={handleFileChange}
+            imageName={formData.imageName}
+            isSubmitting={isSubmitting}
+          />
         </div>
 
-        {error && (
-          <div className="alert alert-error text-sm p-3">
-            <ExclamationCircleIcon className="w-5 h-5"/>
-            <span>{error}</span>
-          </div>
-        )}
+        <ErrorMessage error={error} />
       </form>
     </div>
   );

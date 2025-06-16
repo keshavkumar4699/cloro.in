@@ -4,7 +4,7 @@ import Logo from "../Logo";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import SidebarLink from "./SidebarLink";
 import { navlinks } from "@/data/navlink";
-import { topics } from "@/data/topic";
+import { categories, topics } from "@/data/categories";
 
 const LeftSidebar = memo(({ isMobileOpen, onMobileClose }) => {
   const handleOverlayClick = useCallback((e) => {
@@ -48,7 +48,7 @@ const LeftSidebar = memo(({ isMobileOpen, onMobileClose }) => {
             <h2 className="text-xs font-semibold text-base-content/70 uppercase tracking-wider px-2">
               Topics
             </h2>
-            <SidebarLink items={topics} />
+            <SidebarLink items={categories} />
           </div>
 
           <div className="divider my-0" />
